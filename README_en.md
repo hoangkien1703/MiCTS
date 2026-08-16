@@ -25,6 +25,12 @@ Trigger Circle to Search on any Android 9–16 device
    - MiCTS provides a trigger tile, so you can add it to the Quick Settings panel and trigger by clicking it
    - For Xiaomi devices, MiCTS has built-in support for `Trigger by long press gesture handle` and `Trigger by long press home button`, which can be enabled in the MiCTS settings (need to activate the module and restart the phone after installing MiCTS)
    - For Samsung devices running Android 13 and above, you can download and install "Routines+" from the [Galaxy Store](https://galaxystore.samsung.com/detail/com.samsung.android.app.routineplus) or [Good Lock](https://galaxystore.samsung.com/detail/com.samsung.android.goodlock). Then, go to Settings > Modes and Routines to create routines that launch MiCTS by Button action such as long-pressing the power button.
+
+### ColorOS 16 / OnePlus compatibility build
+
+This fork adds native gesture-handle hooks for OPPO, OnePlus, and realme devices on ColorOS 16 / Realme UI 7. The gesture integration requires root, LSPosed 2.0.1+ (API 101), and these scopes: `System Framework`, `System UI`, `System Launcher`, and `Google`.
+
+After activating the module and rebooting, open MiCTS settings and enable `Trigger by long press gesture handle`. Google must be installed, allowed to auto-launch and run in the background, and selected as the default digital assistant. Directly launching MiCTS still uses the original non-root path, which cannot override Google eligibility or ColorOS assistant restrictions.
    
 
 ## Settings

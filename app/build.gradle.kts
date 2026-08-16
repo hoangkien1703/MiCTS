@@ -52,6 +52,7 @@ android {
         create("MiCTS") {
             dimension = "app"
             applicationId = "com.parallelc.micts"
+            versionNameSuffix = "-coloros16-oneplus"
             buildConfigField("String", "APP_NAME", "\"MiCTS\"")
         }
 

@@ -11,7 +11,10 @@ import com.parallelc.micts.config.XposedConfig.KEY_SPOOF_BRAND
 import com.parallelc.micts.config.XposedConfig.KEY_SPOOF_DEVICE
 import com.parallelc.micts.config.XposedConfig.KEY_SPOOF_MANUFACTURER
 import com.parallelc.micts.config.XposedConfig.KEY_SPOOF_MODEL
+import com.parallelc.micts.config.isColorOsFamily
 import com.parallelc.micts.hooker.CSMSHooker
+import com.parallelc.micts.hooker.ColorOSLauncherHooker
+import com.parallelc.micts.hooker.ColorOSSystemUIHooker
 import com.parallelc.micts.hooker.InvokeOmniHooker
 import com.parallelc.micts.hooker.LongPressHomeHooker
 import com.parallelc.micts.hooker.NavBarActionsConfigHooker
@@ -110,11 +113,25 @@ class ModuleMain : XposedModule() {
                 DEVICE.set(null, prefs.getString(KEY_SPOOF_DEVICE, DEFAULT_CONFIG[KEY_SPOOF_DEVICE] as String))
             }
             "com.android.systemui" -> {
-                if (Build.MANUFACTURER != "meizu") return
+                when {
+                    Build.MANUFACTURER == "meizu" -> runCatching {
+                        NavBarActionsConfigHooker.hook(param)
+                    }.onFailure { e ->
+                        log(Log.ERROR, "MiCTS", "hook NavBarActionsConfig fail", e)
+                    }
+                    isColorOsFamily() -> runCatching {
+                        ColorOSSystemUIHooker.hook(param)
+                    }.onFailure { e ->
+                        log(Log.ERROR, "MiCTS", "hook ColorOS SystemUI fail", e)
+                    }
+                }
+            }
+            "com.android.launcher" -> {
+                if (!isColorOsFamily()) return
                 runCatching {
-                    NavBarActionsConfigHooker.hook(param)
+                    ColorOSLauncherHooker.hook(param)
                 }.onFailure { e ->
-                    log(Log.ERROR, "MiCTS", "hook NavBarActionsConfig fail", e)
+                    log(Log.ERROR, "MiCTS", "hook ColorOS Launcher fail", e)
                 }
             }
         }

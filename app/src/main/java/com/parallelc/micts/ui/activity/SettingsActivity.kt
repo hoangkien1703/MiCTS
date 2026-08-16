@@ -66,6 +66,7 @@ import com.parallelc.micts.config.AppConfig
 import com.parallelc.micts.config.Language
 import com.parallelc.micts.config.TriggerService
 import com.parallelc.micts.config.XposedConfig
+import com.parallelc.micts.config.isColorOsFamily
 import com.parallelc.micts.ui.theme.MiCTSTheme
 import com.parallelc.micts.ui.viewmodel.SettingsViewModel
 import kotlin.system.exitProcess
@@ -335,8 +336,9 @@ fun SettingsPage(
         }
 
         val isXiaomi = Build.MANUFACTURER == "Xiaomi"
+        val isColorOs = isColorOsFamily()
         val isMeizu = Build.MANUFACTURER == "meizu"
-        if (isXiaomi) {
+        if (isXiaomi || isColorOs) {
             ListItem(
                 headlineContent = { Text(stringResource(R.string.trigger_by_long_press_gesture_handle)) },
                 trailingContent = {

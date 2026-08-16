@@ -2,6 +2,7 @@ package com.parallelc.micts.ui.activity
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
 import android.media.AudioAttributes
 import android.os.Build
 import android.os.Bundle
@@ -37,13 +38,36 @@ fun triggerCircleToSearch(entryPoint: Int, context: Context?, vibrate: Boolean):
         if (BuildConfig.APP_NAME == "MiCTS") {
             bundle.putLong("invocation_time_ms", SystemClock.elapsedRealtime())
             bundle.putInt("omni.entry_point", entryPoint)
+            val contextualSearchKeyId = Resources.getSystem().getIdentifier(
+                "config_defaultContextualSearchKey",
+                "string",
+                "android"
+            )
+            if (contextualSearchKeyId != 0) {
+                Resources.getSystem().getString(contextualSearchKeyId)
+                    .takeIf { it.isNotBlank() }
+                    ?.let { bundle.putInt(it, entryPoint) }
+            }
             bundle.putBoolean("micts_trigger", true)
         }
         val iVimsClass = Class.forName("com.android.internal.app.IVoiceInteractionManagerService")
         val vis = Class.forName("android.os.ServiceManager").getMethod("getService", String::class.java).invoke(null, "voiceinteraction")
         val vims = Class.forName("com.android.internal.app.IVoiceInteractionManagerService\$Stub").getMethod("asInterface", IBinder::class.java).invoke(null, vis)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            HiddenApiBypass.invoke(iVimsClass, vims, "showSessionFromSession", null, bundle, 7, "hyperOS_home") as Boolean
+            val attributionTag = if (Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true)) {
+                "hyperOS_home"
+            } else {
+                null
+            }
+            HiddenApiBypass.invoke(
+                iVimsClass,
+                vims,
+                "showSessionFromSession",
+                null,
+                bundle,
+                7,
+                attributionTag
+            ) as Boolean
         } else {
             HiddenApiBypass.invoke(iVimsClass, vims, "showSessionFromSession", null, bundle, 7) as Boolean
         }
