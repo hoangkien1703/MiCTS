@@ -1,6 +1,12 @@
 package com.parallelc.micts.ui.activity
 
 import android.content.Intent
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.provider.Settings
+import android.widget.Toast
+import com.parallelc.micts.trigger.TriggerDiagnostics
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -103,7 +109,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
             LargeTopAppBar(
                 title = {
                     Column {
-                        Text(BuildConfig.APP_NAME)
+                        Text(stringResource(R.string.app_name))
                         Text(
                             text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                             style = MaterialTheme.typography.titleSmall,
@@ -176,7 +182,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                         modifier = Modifier.size(50.dp)
                     )
                     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        Text(BuildConfig.APP_NAME)
+                        Text(stringResource(R.string.app_name))
                         Text(
                             text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                             style = MaterialTheme.typography.titleSmall,
@@ -223,6 +229,33 @@ fun SettingsPage(
             }
         )
 
+        if (BuildConfig.APP_NAME == "MiCTS") {
+            val context = LocalContext.current
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.fresh_session)) },
+                supportingContent = { Text(stringResource(R.string.fresh_session_description)) },
+                trailingContent = {
+                    Switch(
+                        checked = appConfig[AppConfig.KEY_FRESH_SESSION] as Boolean,
+                        onCheckedChange = { viewModel.updateAppConfig(AppConfig.KEY_FRESH_SESSION, it) }
+                    )
+                }
+            )
+            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+                TextButton(onClick = {
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    clipboard.setPrimaryClip(ClipData.newPlainText("MiCTS diagnostics", TriggerDiagnostics.read(context)))
+                    Toast.makeText(context, R.string.diagnostics_copied, Toast.LENGTH_SHORT).show()
+                }) { Text(stringResource(R.string.copy_diagnostics)) }
+                TextButton(onClick = {
+                    runCatching { context.startActivity(Intent(Settings.ACTION_VOICE_INPUT_SETTINGS)) }
+                        .onFailure {
+                            runCatching { context.startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)) }
+                        }
+                }) { Text(stringResource(R.string.assistant_settings)) }
+            }
+        }
+
         SliderSettingItem(
             title = stringResource(R.string.default_trigger_delay),
             value = (appConfig[AppConfig.KEY_DEFAULT_DELAY] as Long).toFloat(),
@@ -250,7 +283,7 @@ fun SettingsPage(
             }
         )
 
-        ListItem(
+        if (appConfig[AppConfig.KEY_FRESH_SESSION] != true) ListItem(
             headlineContent = { Text(stringResource(R.string.async_trigger)) },
             trailingContent = {
                 Switch(
