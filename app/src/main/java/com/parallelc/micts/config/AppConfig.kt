@@ -34,6 +34,6 @@ object AppConfig {
         KEY_TILE_DELAY to 400L,
         KEY_VIBRATE to false,
         KEY_ASYNC_TRIGGER to false,
-        KEY_FRESH_SESSION to BuildConfig.IS_PREVIEW,
+        KEY_FRESH_SESSION to (BuildConfig.IS_PREVIEW && BuildConfig.APP_NAME == "MiCTS"),
     )
 }
