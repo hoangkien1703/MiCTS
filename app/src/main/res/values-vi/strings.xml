@@ -22,8 +22,8 @@
     <string name="about">Giới thiệu</string>
     <string name="language">Ngôn ngữ</string>
     <string name="follow_system">Theo hệ thống</string>
-    <string name="fresh_session">Tạo phiên trợ lý mới</string>
-    <string name="fresh_session_description">Thử bật nếu chỉ tìm kiếm được sau khi mở Google. Cần đặt Google làm trợ lý kỹ thuật số mặc định. Tắt để so sánh với cách kích hoạt cũ.</string>
+    <string name="fresh_session">Chế độ tương thích thanh bên</string>
+    <string name="fresh_session_description">Đóng MiCTS trước khi gọi tìm kiếm để Google nhận màn hình ứng dụng bên dưới. Cần đặt Google làm trợ lý mặc định. Tắt để so sánh với cách kích hoạt gốc.</string>
     <string name="copy_diagnostics">Sao chép chẩn đoán</string>
     <string name="assistant_settings">Cài đặt trợ lý</string>
     <string name="diagnostics_copied">Đã sao chép chẩn đoán</string>

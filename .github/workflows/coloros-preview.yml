@@ -47,9 +47,22 @@ jobs:
           "$build_tools/aapt2" dump badging dist/MiCTS-Preview-ColorOS.apk > dist/apk-info.txt
           grep -q "package: name='com.parallelc.micts.preview'" dist/apk-info.txt
           grep -q "application-label:'MiCTS Preview'" dist/apk-info.txt
+          grep -q "versionCode='1002'" dist/apk-info.txt
           "$build_tools/aapt2" dump xmltree dist/MiCTS-Preview-ColorOS.apk --file res/xml/shortcuts.xml > dist/shortcuts.txt
           grep -q 'com.parallelc.micts.preview' dist/shortcuts.txt
           (cd dist && sha256sum MiCTS-Preview-ColorOS.apk > SHA256SUMS.txt)
+      - name: Verify update compatibility with preview 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh release download coloros-preview-3-1 --pattern MiCTS-Preview-ColorOS.apk --dir previous
+          build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          previous_cert=$("$build_tools/apksigner" verify --print-certs previous/MiCTS-Preview-ColorOS.apk | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')
+          current_cert=$("$build_tools/apksigner" verify --print-certs dist/MiCTS-Preview-ColorOS.apk | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')
+          test -n "$previous_cert"
+          test "$previous_cert" = "$current_cert"
       - name: Save test reports
         if: always()
         uses: actions/upload-artifact@v4

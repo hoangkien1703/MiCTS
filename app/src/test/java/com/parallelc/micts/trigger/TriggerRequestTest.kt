@@ -13,12 +13,12 @@ class TriggerRequestTest {
         assertEquals(0, calls)
     }
 
-    @Test fun rejectedFreshRequestCanRecoverWithLegacy() = runBlocking {
+    @Test fun rejectedApplicationRequestCanRecoverWithGesture() = runBlocking {
         val events = mutableListOf<String>()
         val result = TriggerRequest.run(400L, { true }, { events += "wait:$it" },
-            { events += "fresh"; false }, { events += "legacy"; true })
+            { events += "application"; false }, { events += "gesture"; true })
         assertEquals(TriggerResult.ACCEPTED, result)
-        assertEquals(listOf("wait:400", "fresh", "wait:250", "legacy"), events)
+        assertEquals(listOf("wait:400", "application", "wait:250", "gesture"), events)
     }
 
     @Test fun bothRejectedReportsFailureWithoutLooping() = runBlocking {
@@ -28,13 +28,13 @@ class TriggerRequestTest {
         assertEquals(2, calls)
     }
 
-    @Test fun leavingBeforeFirstRequestDoesNotLaunchAssistant() = runBlocking {
+    @Test fun ineligibleRequestDoesNotLaunchAssistant() = runBlocking {
         val result = TriggerRequest.run(120L, { false }, {},
             { error("must not launch") }, { error("must not launch") })
         assertEquals(TriggerResult.CANCELLED, result)
     }
 
-    @Test fun leavingDuringRecoveryDoesNotLaunchOverAnotherApp() = runBlocking {
+    @Test fun lockingDuringRecoveryDoesNotLaunchAssistant() = runBlocking {
         var foreground = true
         val result = TriggerRequest.run(120L, { foreground },
             { if (it == 250L) foreground = false }, { false }, { error("must not launch") })

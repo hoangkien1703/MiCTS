@@ -6,17 +6,17 @@ enum class TriggerResult { ACCEPTED, REJECTED, CANCELLED }
 object TriggerRequest {
     suspend fun run(
         initialDelayMs: Long,
-        isForeground: () -> Boolean,
+        isEligible: () -> Boolean,
         wait: suspend (Long) -> Unit,
-        fresh: () -> Boolean,
-        legacy: () -> Boolean,
+        primary: () -> Boolean,
+        fallback: () -> Boolean,
     ): TriggerResult {
         wait(initialDelayMs)
-        if (!isForeground()) return TriggerResult.CANCELLED
-        if (fresh()) return TriggerResult.ACCEPTED
-        // Give the visible activity/system service one short settling interval after rejection.
+        if (!isEligible()) return TriggerResult.CANCELLED
+        if (primary()) return TriggerResult.ACCEPTED
+        // Give the system one short settling interval after a rejected request.
         wait(250L)
-        if (!isForeground()) return TriggerResult.CANCELLED
-        return if (legacy()) TriggerResult.ACCEPTED else TriggerResult.REJECTED
+        if (!isEligible()) return TriggerResult.CANCELLED
+        return if (fallback()) TriggerResult.ACCEPTED else TriggerResult.REJECTED
     }
 }
