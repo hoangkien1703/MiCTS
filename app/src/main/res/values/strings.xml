@@ -40,6 +40,6 @@
     <string name="copy_diagnostics">Copy diagnostics</string>
     <string name="assistant_settings">Assistant settings</string>
     <string name="diagnostics_copied">Diagnostics copied</string>
-    <string name="no_diagnostics">No request recorded yet. Try launching MiCTS Preview first.</string>
-    <string name="preview_trigger_failed">Assistant request failed. Long-press MiCTS Preview, open Settings, and check your default assistant or copy diagnostics.</string>
+    <string name="no_diagnostics">No request recorded yet. Try launching MiCTS Preview 2 first.</string>
+    <string name="preview_trigger_failed">Assistant request failed. Long-press MiCTS Preview 2, open Settings, and check your default assistant or copy diagnostics.</string>
 </resources>

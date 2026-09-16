@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">MiCTS Preview</string>
-    <string name="tile_label" translatable="false">MiCTS Preview</string>
-    <string name="title_activity_settings" translatable="false">MiCTS Preview Settings</string>
+    <string name="app_name" translatable="false">MiCTS Preview 2</string>
+    <string name="tile_label" translatable="false">MiCTS Preview 2</string>
+    <string name="title_activity_settings" translatable="false">MiCTS Preview 2 Settings</string>
 </resources>

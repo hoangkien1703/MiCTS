@@ -1,6 +1,6 @@
 # MiCTS Preview 2 — sidebar screen capture
 
-Download **MiCTS-Preview-ColorOS.apk** from Assets. This updates **MiCTS Preview** (version code 1002); the original MiCTS stays installed separately. The workflow checks that this APK is signed by the same certificate as preview 1.
+Download **MiCTS-Preview-ColorOS.apk** from Assets. This installs **MiCTS Preview 2** (`com.parallelc.micts.preview2`, version code 1002) alongside both the original MiCTS and the first preview. The first preview signing key was not retained, so this uses a separate package instead of requiring removal of that preview. A dedicated preview-only signing key is now created at an explicit path, cached, and checked against the APK certificate.
 
 ## Fix being tested
 
@@ -14,9 +14,9 @@ Newer taps cancel pending requests; duplicate destruction callbacks cannot queue
 
 ## Test on OnePlus Ace 5 / ColorOS 16.0.10
 
-1. Install this APK as an update to **MiCTS Preview**. Keep the original MiCTS for comparison.
-2. Long-press **MiCTS Preview → Settings** and leave **Sidebar compatibility mode** enabled (on by default). Existing preview 1 installations keep the enabled setting, with the revised behavior.
-3. Add **MiCTS Preview** to the ColorOS sidebar, open a normal webpage or another app, and launch it from the sidebar.
+1. Install **MiCTS Preview 2** as a separate app. Keep the original MiCTS and preview 1 for comparison.
+2. Long-press **MiCTS Preview 2 → Settings** and leave **Sidebar compatibility mode** enabled (on by default).
+3. Add **MiCTS Preview 2** to the ColorOS sidebar, open a normal webpage or another app, and launch it from the sidebar.
 4. Check that the underlying screen appears in Circle to Search and can be selected. Repeat several times without opening Google in between, then after locking/unlocking and idle time.
 5. If the sidebar is captured or the transition has not finished, try **Default trigger delay** around 500–800 ms in Preview Settings.
 6. If it is still blank or the original intermittent failure returns, use **Copy diagnostics** after a failure and include the app you were searching. Turn **Sidebar compatibility mode** off only to compare with the original invocation behavior.
@@ -25,6 +25,6 @@ Keep Google selected as the default digital assistant. A successful request resu
 
 ## Validation
 
-The workflow runs 11 JVM regression tests covering bounded fallback, cancellation, duplicate handoffs, replacement by a newer request, expiry, and screen locking. It builds the APK and verifies its signature, preview package and label, version code, Settings shortcut, and signing compatibility with preview 1 before publishing. These checks do not reproduce ColorOS or Google's UI.
+The workflow runs 11 JVM regression tests covering bounded fallback, cancellation, duplicate handoffs, replacement by a newer request, expiry, and screen locking. It builds the APK and verifies its signature, preview package and label, version code, Settings shortcut, and use of the dedicated preview signing key before publishing. These checks do not reproduce ColorOS or Google's UI.
 
 References: [Android Activity.showAssist](https://developer.android.com/reference/android/app/Activity#showAssist(android.os.Bundle)), [AOSP activity-token filtering](https://android.googlesource.com/platform/frameworks/base/+/master/services/voiceinteraction/java/com/android/server/voiceinteraction/VoiceInteractionManagerServiceImpl.java), [AOSP voice-interaction entry points](https://android.googlesource.com/platform/frameworks/base/+/master/services/voiceinteraction/java/com/android/server/voiceinteraction/VoiceInteractionManagerService.java).

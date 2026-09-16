@@ -27,6 +27,6 @@
     <string name="copy_diagnostics">Sao chép chẩn đoán</string>
     <string name="assistant_settings">Cài đặt trợ lý</string>
     <string name="diagnostics_copied">Đã sao chép chẩn đoán</string>
-    <string name="no_diagnostics">Chưa có lần kích hoạt nào. Hãy mở MiCTS Preview trước.</string>
-    <string name="preview_trigger_failed">Không gọi được trợ lý. Nhấn giữ MiCTS Preview, mở Cài đặt để kiểm tra trợ lý mặc định hoặc sao chép chẩn đoán.</string>
+    <string name="no_diagnostics">Chưa có lần kích hoạt nào. Hãy mở MiCTS Preview 2 trước.</string>
+    <string name="preview_trigger_failed">Không gọi được trợ lý. Nhấn giữ MiCTS Preview 2, mở Cài đặt để kiểm tra trợ lý mặc định hoặc sao chép chẩn đoán.</string>
 </resources>

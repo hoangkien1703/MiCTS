@@ -32,15 +32,24 @@ android {
         buildConfigField("boolean", "IS_PREVIEW", "false")
     }
 
+    signingConfigs {
+        create("preview") {
+            storeFile = rootProject.file(".preview-signing/preview.jks")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         create("preview") {
             initWith(getByName("debug"))
-            applicationIdSuffix = ".preview"
+            applicationIdSuffix = ".preview2"
             versionNameSuffix = "-coloros-preview.2"
             buildConfigField("boolean", "IS_PREVIEW", "true")
             matchingFallbacks += "debug"
             // Reuse the same preview-only key across builds. Never use the stable key.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("preview")
         }
         release {
             isMinifyEnabled = true
