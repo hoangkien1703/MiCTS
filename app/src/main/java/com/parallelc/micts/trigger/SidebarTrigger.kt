@@ -7,6 +7,7 @@ import android.os.SystemClock
 import android.service.voice.VoiceInteractionSession
 import android.widget.Toast
 import com.parallelc.micts.R
+import com.parallelc.micts.config.AppConfig
 import com.parallelc.micts.ui.activity.triggerCircleToSearch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,12 +35,13 @@ object SidebarTrigger {
             TriggerDiagnostics.record(context, "launcher destroyed; waiting for underlying app")
             val power = context.getSystemService(PowerManager::class.java)
             val keyguard = context.getSystemService(KeyguardManager::class.java)
-            val result = TriggerRequest.run(
+            val eligible = {
+                gate.canRun(ticket, SystemClock.elapsedRealtime() - requestedAt,
+                    power.isInteractive, keyguard.isKeyguardLocked)
+            }
+            val trigger: suspend () -> TriggerResult = { TriggerRequest.run(
                 initialDelayMs = delayMs.coerceIn(250L, 2000L),
-                isEligible = {
-                    gate.canRun(ticket, SystemClock.elapsedRealtime() - requestedAt,
-                        power.isInteractive, keyguard.isKeyguardLocked)
-                },
+                isEligible = eligible,
                 wait = { delay(it) },
                 primary = {
                     // Same source as Activity.showAssist, but no calling Activity token:
@@ -54,7 +56,17 @@ object SidebarTrigger {
                     TriggerDiagnostics.record(context, "visible-screen gesture-source accepted=$accepted")
                     accepted
                 }
-            )
+            ) }
+            val prepareGoogle = context.getSharedPreferences(AppConfig.CONFIG_NAME, Context.MODE_PRIVATE)
+                .getBoolean(AppConfig.KEY_PREPARE_GOOGLE,
+                    AppConfig.DEFAULT_CONFIG[AppConfig.KEY_PREPARE_GOOGLE] as Boolean)
+            val result = if (prepareGoogle) {
+                ConnectionWarmup.run(GoogleSearchConnection(context), eligible, { delay(it) },
+                    { TriggerDiagnostics.record(context, it) }, trigger)
+            } else {
+                TriggerDiagnostics.record(context, "Google preparation disabled")
+                trigger()
+            }
             when (result) {
                 TriggerResult.REJECTED -> Toast.makeText(context,
                     R.string.preview_trigger_failed, Toast.LENGTH_LONG).show()

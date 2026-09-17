@@ -17,5 +17,5 @@ class SidebarRequestGate {
     }
 
     fun canRun(ticket: Long, ageMs: Long, interactive: Boolean, locked: Boolean): Boolean =
-        ticket == generation && claimed && ageMs in 0L..3000L && interactive && !locked
+        ticket == generation && claimed && ageMs in 0L..5000L && interactive && !locked
 }

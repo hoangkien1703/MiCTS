@@ -45,7 +45,7 @@ android {
         create("preview") {
             initWith(getByName("debug"))
             applicationIdSuffix = ".preview2"
-            versionNameSuffix = "-coloros-preview.2"
+            versionNameSuffix = "-coloros-preview.3"
             buildConfigField("boolean", "IS_PREVIEW", "true")
             matchingFallbacks += "debug"
             // Reuse the same preview-only key across builds. Never use the stable key.
@@ -95,7 +95,10 @@ androidComponents {
         variant.outputs.forEach { output ->
             require(output is VariantOutputImpl)
 
-            if (variant.buildType == "preview") output.versionCode.set(1002)
+            if (variant.buildType == "preview") {
+                output.versionCode.set(1003)
+                output.versionName.set("1.0-coloros-preview.3")
+            }
             val vName = output.versionName.get()
             val vCode = output.versionCode.get()
 

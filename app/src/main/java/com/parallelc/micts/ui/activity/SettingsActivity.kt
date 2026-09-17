@@ -241,6 +241,16 @@ fun SettingsPage(
                     )
                 }
             )
+            if (appConfig[AppConfig.KEY_FRESH_SESSION] == true) ListItem(
+                headlineContent = { Text(stringResource(R.string.prepare_google)) },
+                supportingContent = { Text(stringResource(R.string.prepare_google_description)) },
+                trailingContent = {
+                    Switch(
+                        checked = appConfig[AppConfig.KEY_PREPARE_GOOGLE] as Boolean,
+                        onCheckedChange = { viewModel.updateAppConfig(AppConfig.KEY_PREPARE_GOOGLE, it) }
+                    )
+                }
+            )
             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
                 TextButton(onClick = {
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

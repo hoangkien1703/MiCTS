@@ -29,4 +29,6 @@
     <string name="diagnostics_copied">Đã sao chép chẩn đoán</string>
     <string name="no_diagnostics">Chưa có lần kích hoạt nào. Hãy mở MiCTS Preview 2 trước.</string>
     <string name="preview_trigger_failed">Không gọi được trợ lý. Nhấn giữ MiCTS Preview 2, mở Cài đặt để kiểm tra trợ lý mặc định hoặc sao chép chẩn đoán.</string>
+    <string name="prepare_google">Chuẩn bị Google trước khi tìm kiếm</string>
+    <string name="prepare_google_description">Kết nối ngắn với Google trong nền trước khi tìm kiếm trên màn hình hiện tại. Có thể giúp khi cần mở Google trước thì tính năng mới hoạt động.</string>
 </resources>

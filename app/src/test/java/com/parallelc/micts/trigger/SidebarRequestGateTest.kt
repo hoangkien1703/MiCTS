@@ -42,8 +42,8 @@ class SidebarRequestGateTest {
         val gate = SidebarRequestGate()
         val ticket = gate.reserve()
         gate.claim(ticket)
-        assertTrue(gate.canRun(ticket, 3000L, true, false))
-        assertFalse(gate.canRun(ticket, 3001L, true, false))
+        assertTrue(gate.canRun(ticket, 5000L, true, false))
+        assertFalse(gate.canRun(ticket, 5001L, true, false))
         assertFalse(gate.canRun(ticket, -1L, true, false))
     }
 }

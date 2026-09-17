@@ -26,6 +26,7 @@ object AppConfig {
     const val KEY_TILE_DELAY = "tile_delay"
     const val KEY_VIBRATE = "vibrate"
     const val KEY_ASYNC_TRIGGER = "async_trigger"
+    const val KEY_PREPARE_GOOGLE = "prepare_google"
     const val KEY_FRESH_SESSION = "fresh_assistant_session"
 
     val DEFAULT_CONFIG = mapOf<String, Any>(
@@ -34,6 +35,7 @@ object AppConfig {
         KEY_TILE_DELAY to 400L,
         KEY_VIBRATE to false,
         KEY_ASYNC_TRIGGER to false,
+        KEY_PREPARE_GOOGLE to (BuildConfig.IS_PREVIEW && BuildConfig.APP_NAME == "MiCTS"),
         KEY_FRESH_SESSION to (BuildConfig.IS_PREVIEW && BuildConfig.APP_NAME == "MiCTS"),
     )
 }

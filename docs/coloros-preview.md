@@ -1,30 +1,34 @@
-# MiCTS Preview 2 — sidebar screen capture
+# MiCTS Preview 2 — Google preparation update (1003)
 
-Download **MiCTS-Preview-ColorOS.apk** from Assets. This installs **MiCTS Preview 2** (`com.parallelc.micts.preview2`, version code 1002) alongside both the original MiCTS and the first preview. The first preview signing key was not retained, so this uses a separate package instead of requiring removal of that preview. A dedicated preview-only signing key is now created at an explicit path, cached, and checked against the APK certificate.
+Download **MiCTS-Preview-ColorOS.apk** from Assets. Install it as an **update to MiCTS Preview 2**. The package remains `com.parallelc.micts.preview2`, the app label remains **MiCTS Preview 2**, and the version is `1.0-coloros-preview.3` (1003). The original MiCTS and first preview stay separate. The workflow checks the APK against the certificate used for version 1002 before publishing.
 
-## Fix being tested
+## Why this update
 
-Preview 1 opened Google's Circle to Search UI but showed a blank screen when launched from the ColorOS sidebar. It called `Activity.showAssist()` while MiCTS was the foreground activity and kept that activity alive for 1.2 seconds. Android passes the caller's activity token on that route and limits assist data selection to that activity.
+On OnePlus Ace 5 / ColorOS 16.0.10 with Google 17.56.15, the user confirmed that Preview 2 captures the correct underlying app when it works. During a failure, diagnostics show `visible-screen application-source accepted=true`, but no search interface appears until Google is opened manually. The Boolean therefore cannot be used to decide whether the UI appeared.
 
-Preview 2 uses a no-display launcher that finishes immediately. Only after its destruction does an application-context request wait briefly (at least 250 ms) for the underlying app/sidebar transition to settle, then invoke the existing voice-interaction entry point with assist data, screenshot, and application-source flags. This retains the source flag used by preview 1, without passing MiCTS as the activity to capture. A rejected request gets one gesture-source fallback. An accepted request is not retried.
+This update tests whether briefly starting and connecting to Google's exported public search service before invoking Circle to Search resolves that accepted-but-invisible request. This is a targeted workaround for a suspected Google process/readiness issue, not a proven diagnosis of Google's internal failure.
 
-There is no `Activity.showAssist()` call in the new path. No accessibility, root, screen-recording, or persistent background service permission is added. Android and Google handle the screenshot; MiCTS does not read or save it. The app does not bypass protected screens.
+## Changes
 
-Newer taps cancel pending requests; duplicate destruction callbacks cannot queue duplicates. Locked screens, screen-off states, and requests older than three seconds are rejected. The short handoff cannot inspect which unrelated app the user switches to during the delay, so remain on the screen being searched.
+- Keep the working no-display sidebar launcher and current-screen capture path.
+- Add **Prepare Google before searching**, enabled by default in this preview. Bind only the public search service advertised by the installed Google app, wait up to 1.5 seconds for a connection, and allow 200 ms for initialization. This does not open a Google activity or send any Binder commands, search queries, audio, or screen content to the preparation service.
+- Hold a successful connection through the request and for 500 ms after acceptance, then unbind. Cancellation, a timeout, a null binding, a rejected bind, and a newer tap all clean up the connection. There is no permanent service or keep-alive.
+- If the service is unavailable or restricted, record that result and use the normal trigger. Never bypass a service permission. Never repeat a request that Android already accepted.
+- Recheck screen/lock state and request generation after preparation. Requests older than five seconds are discarded; the larger window accommodates preparation plus the existing configurable delay.
+- Add preparation results to **Copy diagnostics**. A service connection still does not prove that Circle to Search is ready or visible.
 
-## Test on OnePlus Ace 5 / ColorOS 16.0.10
+No additional Android permissions, root, accessibility, or screen-recording setup is required. The Google service's availability and effect on ColorOS need device testing.
 
-1. Install **MiCTS Preview 2** as a separate app. Keep the original MiCTS and preview 1 for comparison.
-2. Long-press **MiCTS Preview 2 → Settings** and leave **Sidebar compatibility mode** enabled (on by default).
-3. Add **MiCTS Preview 2** to the ColorOS sidebar, open a normal webpage or another app, and launch it from the sidebar.
-4. Check that the underlying screen appears in Circle to Search and can be selected. Repeat several times without opening Google in between, then after locking/unlocking and idle time.
-5. If the sidebar is captured or the transition has not finished, try **Default trigger delay** around 500–800 ms in Preview Settings.
-6. If it is still blank or the original intermittent failure returns, use **Copy diagnostics** after a failure and include the app you were searching. Turn **Sidebar compatibility mode** off only to compare with the original invocation behavior.
+## Test
 
-Keep Google selected as the default digital assistant. A successful request result only means Android accepted the invocation; Google may still decline Circle to Search or return no screen content. The sidebar fix and long-term reliability need real-device confirmation.
+1. Install this APK over **MiCTS Preview 2**. Long-press its app icon → **Settings**.
+2. Keep **Sidebar compatibility mode** and **Prepare Google before searching** enabled.
+3. Open an ordinary webpage and launch **MiCTS Preview 2** from the sidebar repeatedly without opening Google. Repeat after leaving the phone idle and after locking/unlocking it.
+4. If a failure recurs, use **Copy diagnostics** before opening Google and share the report. It now distinguishes successful preparation from timeout, unavailable service, or binding rejection.
+5. To compare with version 1002 behavior, turn **Prepare Google before searching** off. Keep sidebar compatibility enabled to preserve the working capture handoff.
 
 ## Validation
 
-The workflow runs 11 JVM regression tests covering bounded fallback, cancellation, duplicate handoffs, replacement by a newer request, expiry, and screen locking. It builds the APK and verifies its signature, preview package and label, version code, Settings shortcut, and use of the dedicated preview signing key before publishing. These checks do not reproduce ColorOS or Google's UI.
+The workflow runs JVM regression tests for preparation sequencing, bounded waits, cleanup on cancellation, unavailable services, screen locking, superseded requests, accepted-request deduplication, and the existing sidebar handoff. It builds and verifies package, version, label, shortcut target, signature, and compatibility with the installed Preview 2 certificate. These checks do not emulate Google's proprietary service or ColorOS; real-device reliability remains unverified.
 
-References: [Android Activity.showAssist](https://developer.android.com/reference/android/app/Activity#showAssist(android.os.Bundle)), [AOSP activity-token filtering](https://android.googlesource.com/platform/frameworks/base/+/master/services/voiceinteraction/java/com/android/server/voiceinteraction/VoiceInteractionManagerServiceImpl.java), [AOSP voice-interaction entry points](https://android.googlesource.com/platform/frameworks/base/+/master/services/voiceinteraction/java/com/android/server/voiceinteraction/VoiceInteractionManagerService.java).
+API references: [Android bound services](https://developer.android.com/develop/background-work/services/bound-services), [ServiceConnection callbacks](https://developer.android.com/reference/android/content/ServiceConnection).

@@ -61,7 +61,7 @@ jobs:
           "$build_tools/aapt2" dump badging dist/MiCTS-Preview-ColorOS.apk > dist/apk-info.txt
           grep -q "package: name='com.parallelc.micts.preview2'" dist/apk-info.txt
           grep -q "application-label:'MiCTS Preview 2'" dist/apk-info.txt
-          grep -q "versionCode='1002'" dist/apk-info.txt
+          grep -q "versionCode='1003'" dist/apk-info.txt
           "$build_tools/aapt2" dump xmltree dist/MiCTS-Preview-ColorOS.apk --file res/xml/shortcuts.xml > dist/shortcuts.txt
           grep -q 'com.parallelc.micts.preview2' dist/shortcuts.txt
           (cd dist && sha256sum MiCTS-Preview-ColorOS.apk > SHA256SUMS.txt)
@@ -75,6 +75,8 @@ jobs:
           actual_cert=$(sed -n 's/^.*certificate SHA-256 digest: //p' dist/signing-info.txt | head -1)
           test -n "$expected_cert"
           test "$expected_cert" = "$actual_cert"
+          # Refuse to publish an APK that cannot update the installed Preview 2.
+          test "$actual_cert" = "64ec4ad50b601e8131ad58cf8dbe66a07fb7706b403ed8582e2d0d77f02b2d5f"
       - name: Save test reports
         if: always()
         uses: actions/upload-artifact@v4
