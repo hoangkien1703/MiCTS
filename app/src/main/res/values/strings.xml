@@ -35,4 +35,13 @@
     <string name="spanish" translatable="false">Español</string>
     <string name="turkish" translatable="false">Türkçe</string>
     <string name="vietnamese" translatable="false">Việt Nam</string>
+    <string name="fresh_session">Sidebar compatibility mode</string>
+    <string name="fresh_session_description">Close MiCTS before requesting Circle to Search so Google can search the app underneath. Google must be the default assistant. Turn off to compare the original trigger.</string>
+    <string name="copy_diagnostics">Copy diagnostics</string>
+    <string name="assistant_settings">Assistant settings</string>
+    <string name="diagnostics_copied">Diagnostics copied</string>
+    <string name="no_diagnostics">No request recorded yet. Try launching MiCTS Preview 2 first.</string>
+    <string name="preview_trigger_failed">Assistant request failed. Long-press MiCTS Preview 2, open Settings, and check your default assistant or copy diagnostics.</string>
+    <string name="prepare_google">Prepare Google before searching</string>
+    <string name="prepare_google_description">Briefly connect to Google in the background before searching your current screen. May help when search only works after opening Google.</string>
 </resources>

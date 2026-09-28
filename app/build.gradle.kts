@@ -29,9 +29,28 @@ android {
         versionName = latestTag
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("boolean", "IS_PREVIEW", "false")
+    }
+
+    signingConfigs {
+        create("preview") {
+            storeFile = rootProject.file(".preview-signing/preview.jks")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
+        create("preview") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".preview2"
+            versionNameSuffix = "-coloros-preview.3"
+            buildConfigField("boolean", "IS_PREVIEW", "true")
+            matchingFallbacks += "debug"
+            // Reuse the same preview-only key across builds. Never use the stable key.
+            signingConfig = signingConfigs.getByName("preview")
+        }
         release {
             isMinifyEnabled = true
             proguardFiles(
@@ -76,6 +95,10 @@ androidComponents {
         variant.outputs.forEach { output ->
             require(output is VariantOutputImpl)
 
+            if (variant.buildType == "preview") {
+                output.versionCode.set(1003)
+                output.versionName.set("1.0-coloros-preview.3")
+            }
             val vName = output.versionName.get()
             val vCode = output.versionCode.get()
 
@@ -89,6 +112,7 @@ kotlin {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))

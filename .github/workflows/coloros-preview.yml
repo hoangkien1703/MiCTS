@@ -1,0 +1,102 @@
+name: ColorOS Preview APK
+
+on:
+  push:
+    branches: [fix/coloros-preview]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coloros-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+      - name: Restore preview signing key
+        uses: actions/cache@v4
+        with:
+          path: .preview-signing/preview.jks
+          key: micts-preview2-signing-v1
+      - name: Create preview-only key if absent
+        run: |
+          set -euo pipefail
+          mkdir -p .preview-signing
+          if [ ! -f .preview-signing/preview.jks ]; then
+            keytool -genkeypair -keystore .preview-signing/preview.jks \
+              -alias androiddebugkey -storepass android -keypass android \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=MiCTS Preview 2,O=Android,C=US"
+          fi
+      - name: Build and test preview
+        run: ./gradlew :app:testMiCTSPreviewUnitTest :app:assembleMiCTSPreview --no-daemon
+      - name: Verify APK identity and signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          mapfile -t apks < <(find app/build/outputs/apk/MiCTS/preview -name '*.apk')
+          test "${#apks[@]}" -eq 1
+          build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          "$build_tools/apksigner" sign --ks .preview-signing/preview.jks \
+            --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android \
+            --out dist/MiCTS-Preview-ColorOS.apk "${apks[0]}"
+          "$build_tools/apksigner" verify --verbose dist/MiCTS-Preview-ColorOS.apk
+          "$build_tools/aapt2" dump badging dist/MiCTS-Preview-ColorOS.apk > dist/apk-info.txt
+          grep -q "package: name='com.parallelc.micts.preview2'" dist/apk-info.txt
+          grep -q "application-label:'MiCTS Preview 2'" dist/apk-info.txt
+          grep -q "versionCode='1003'" dist/apk-info.txt
+          "$build_tools/aapt2" dump xmltree dist/MiCTS-Preview-ColorOS.apk --file res/xml/shortcuts.xml > dist/shortcuts.txt
+          grep -q 'com.parallelc.micts.preview2' dist/shortcuts.txt
+          (cd dist && sha256sum MiCTS-Preview-ColorOS.apk > SHA256SUMS.txt)
+      - name: Verify APK uses the retained preview key
+        run: |
+          set -euo pipefail
+          build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          expected_cert=$(keytool -exportcert -keystore .preview-signing/preview.jks -alias androiddebugkey -storepass android | sha256sum | cut -d ' ' -f 1)
+          "$build_tools/apksigner" verify --print-certs dist/MiCTS-Preview-ColorOS.apk > dist/signing-info.txt
+          cat dist/signing-info.txt
+          actual_cert=$(sed -n 's/^.*certificate SHA-256 digest: //p' dist/signing-info.txt | head -1)
+          test -n "$expected_cert"
+          test "$expected_cert" = "$actual_cert"
+          # Refuse to publish an APK that cannot update the installed Preview 2.
+          test "$actual_cert" = "64ec4ad50b601e8131ad58cf8dbe66a07fb7706b403ed8582e2d0d77f02b2d5f"
+      - name: Save test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-test-reports
+          path: app/build/reports/tests/testMiCTSPreviewUnitTest/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MiCTS-Preview-ColorOS
+          path: dist/
+          if-no-files-found: error
+      - name: Publish downloadable prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag="coloros-preview-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
+          gh release create "$tag" dist/MiCTS-Preview-ColorOS.apk dist/SHA256SUMS.txt \
+            --target "$GITHUB_SHA" --prerelease --latest=false \
+            --title "MiCTS Preview 2 — ColorOS (build ${GITHUB_RUN_NUMBER})" \
+            --notes-file docs/coloros-preview.md

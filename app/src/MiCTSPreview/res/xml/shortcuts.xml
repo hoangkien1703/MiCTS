@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="app_settings"
+        android:enabled="true"
+        android:icon="@drawable/ic_settings"
+        android:shortcutShortLabel="@string/title_activity_settings"
+        android:shortcutLongLabel="@string/title_activity_settings">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.parallelc.micts.preview2"
+            android:targetClass="com.parallelc.micts.ui.activity.SettingsActivity" />
+    </shortcut>
+</shortcuts>
